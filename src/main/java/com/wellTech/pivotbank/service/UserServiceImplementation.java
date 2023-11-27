@@ -200,11 +200,31 @@ public class UserServiceImplementation implements UserService{
 
         sender.setAccountBalance(sender.getAccountBalance().subtract(transferDTO.amount()));
         userRepo.save(sender);
+        String message1 = "Dear "+sender.getFirstName()+",\nYou have successfully sent GHS "+ transferDTO.amount()+" to "+transferDTO.recipientAccNum()+
+                "\nYour Current Balance GHS "+sender.getAccountBalance();
+
+        EmailDetailsDTO senderAlert = EmailDetailsDTO.builder()
+                .recipient(sender.getEmail())
+                .messageBody(message1)
+                .subject("Pivot Bank Ghana")
+                .build();
+
+        emailService.sendEmail(senderAlert);
 
         User recipient = userRepo.findByAccountNumber(transferDTO.recipientAccNum());
         recipient.setAccountBalance(recipient.getAccountBalance().add(transferDTO.amount()));
         userRepo.save(recipient);
 
+        String message2 = "Dear "+recipient.getFirstName()+",\nYou have received GHS "+ transferDTO.amount()+" from "+transferDTO.senderAccNumber()+
+                "\nYour Current Balance GHS "+recipient.getAccountBalance();
+
+        EmailDetailsDTO recipientAlert = EmailDetailsDTO.builder()
+                .recipient(recipient.getEmail())
+                .messageBody(message2)
+                .subject("Pivot Bank Ghana")
+                .build();
+
+        emailService.sendEmail(recipientAlert);
 
         return BankResponse.builder()
                 .responseMessage(CustomUtils.TRANSFER_SUCCESS_MESSAGE)
