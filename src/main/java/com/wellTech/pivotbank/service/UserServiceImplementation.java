@@ -1,6 +1,7 @@
 package com.wellTech.pivotbank.service;
 
 import com.wellTech.pivotbank.dto.*;
+import com.wellTech.pivotbank.entity.TransactionLog;
 import com.wellTech.pivotbank.entity.User;
 import com.wellTech.pivotbank.repository.UserRepo;
 import com.wellTech.pivotbank.utils.AccNumbGenerator;
@@ -16,10 +17,12 @@ public class UserServiceImplementation implements UserService{
 
     private UserRepo userRepo;
     private EmailService emailService;
+    private TransactionLogService transactionLogService;
     @Autowired
-    public UserServiceImplementation(UserRepo userRepo,EmailService emailService){
+    public UserServiceImplementation(UserRepo userRepo,EmailService emailService,TransactionLogService transactionLogService){
         this.userRepo = userRepo;
         this.emailService=emailService;
+        this.transactionLogService= transactionLogService;
     }
     @Override
     public BankResponse createUserAccount(UserDTO userDTO) {
@@ -112,6 +115,16 @@ public class UserServiceImplementation implements UserService{
         recipientAcc.setAccountBalance(recipientAcc.getAccountBalance().add(depositWithdrawaDTO.amount()));
 
         userRepo.save(recipientAcc);
+
+        //log transaction
+        TransactionLogDTO logDto = TransactionLogDTO.builder()
+                .transactionType("deposit")
+                .amount(depositWithdrawaDTO.amount())
+                .accountNumber(recipientAcc.getAccountNumber())
+                .status("success")
+                .build();
+
+        transactionLogService.logTransaction(logDto);
 
         return BankResponse.builder()
                 .responseMessage(CustomUtils.DEPOSIT_SUCCESS_MESSAGE)
