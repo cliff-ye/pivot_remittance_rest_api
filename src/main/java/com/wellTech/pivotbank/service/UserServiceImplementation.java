@@ -18,6 +18,7 @@ public class UserServiceImplementation implements UserService{
     private UserRepo userRepo;
     private EmailService emailService;
     private TransactionLogService transactionLogService;
+    private   TransactionLogDTO logDto;
     @Autowired
     public UserServiceImplementation(UserRepo userRepo,EmailService emailService,TransactionLogService transactionLogService){
         this.userRepo = userRepo;
@@ -117,7 +118,7 @@ public class UserServiceImplementation implements UserService{
         userRepo.save(recipientAcc);
 
         //log transaction
-        TransactionLogDTO logDto = TransactionLogDTO.builder()
+       logDto = TransactionLogDTO.builder()
                 .transactionType("deposit")
                 .amount(depositWithdrawaDTO.amount())
                 .accountNumber(recipientAcc.getAccountNumber())
@@ -164,6 +165,16 @@ public class UserServiceImplementation implements UserService{
         userToDebit.setAccountBalance(userToDebit.getAccountBalance().subtract(depositWithdrawaDTO.amount()));
 
         userRepo.save(userToDebit);
+
+                //log transaction
+                logDto = TransactionLogDTO.builder()
+                .transactionType("withdrawal")
+                .amount(depositWithdrawaDTO.amount())
+                .accountNumber(userToDebit.getAccountNumber())
+                .status("success")
+                .build();
+
+        transactionLogService.logTransaction(logDto);
 
         return BankResponse.builder()
                 .responseMessage(CustomUtils.DEBIT_SUCCESS_MESSAGE)
@@ -227,6 +238,16 @@ public class UserServiceImplementation implements UserService{
         User recipient = userRepo.findByAccountNumber(transferDTO.recipientAccNum());
         recipient.setAccountBalance(recipient.getAccountBalance().add(transferDTO.amount()));
         userRepo.save(recipient);
+
+        //log transaction
+        logDto = TransactionLogDTO.builder()
+                .transactionType("Transfer")
+                .amount(transferDTO.amount())
+                .accountNumber(recipient.getAccountNumber())
+                .status("success")
+                .build();
+
+        transactionLogService.logTransaction(logDto);
 
         String message2 = "Dear "+recipient.getFirstName()+",\nYou have received GHS "+ transferDTO.amount()+" from "+transferDTO.senderAccNumber()+
                 "\nYour Current Balance GHS "+recipient.getAccountBalance();

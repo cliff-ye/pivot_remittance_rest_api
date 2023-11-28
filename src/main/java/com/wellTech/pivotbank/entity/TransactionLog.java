@@ -6,6 +6,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @NoArgsConstructor
@@ -27,7 +28,7 @@ public class TransactionLog {
     @NotNull
     private String status;
     @CreationTimestamp
-    private LocalDateTime sentAt;
+    private LocalDate sentAt;
 
     public String getTransactionId() {
         return transactionId;
@@ -69,11 +70,11 @@ public class TransactionLog {
         this.status = status;
     }
 
-    public LocalDateTime getSentAt() {
+    public LocalDate getSentAt() {
         return sentAt;
     }
 
-    public void setSentAt(LocalDateTime sentAt) {
+    public void setSentAt(LocalDate sentAt) {
         this.sentAt = sentAt;
     }
 }
