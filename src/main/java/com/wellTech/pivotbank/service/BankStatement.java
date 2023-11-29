@@ -5,6 +5,7 @@ import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
+import com.wellTech.pivotbank.dto.EmailDetailsDTO;
 import com.wellTech.pivotbank.entity.TransactionLog;
 import com.wellTech.pivotbank.entity.User;
 import com.wellTech.pivotbank.repository.TransactionLogRepo;
@@ -33,6 +34,9 @@ public class BankStatement {
     private TransactionLogRepo transactionLogRepo;
     @Autowired
     private UserRepo userRepo;
+    @Autowired
+    private EmailService emailService;
+
     public static final String FILE = "D:\\Clifford\\Documents\\springframework\\pivot-bank\\statements.pdf";
 
     public List<TransactionLog> getAllTransactionLog(String accountNumber,String month) throws FileNotFoundException, DocumentException {
@@ -135,6 +139,17 @@ public class BankStatement {
         document.add(transactions);
 
         document.close();
+
+        EmailDetailsDTO email = EmailDetailsDTO.builder()
+                        .recipient(user.getEmail())
+                        .subject("STATEMENT OF ACCOUNT")
+                        .messageBody("Dear "+user.getFirstName()+" "+user.getLastName()+",\n" +
+                                     "We are pleased to attach a copy of your e-statement for the month of "+month+".")
+                        .attachment(FILE)
+                        .build();
+
+        emailService.sendEmailwithPdf(email);
+
         return logList;
     }
 
