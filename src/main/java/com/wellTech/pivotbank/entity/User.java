@@ -45,6 +45,8 @@ public class User {
     private BigDecimal accountBalance;
     @Email
     private String email;
+
+    private String password;
     @NotNull
     @Size(min=10)
     private String phoneNumber;

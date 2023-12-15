@@ -1,5 +1,6 @@
 package com.wellTech.pivotbank.service;
 
+import com.wellTech.pivotbank.config.SecurityConfig;
 import com.wellTech.pivotbank.dto.*;
 import com.wellTech.pivotbank.entity.TransactionLog;
 import com.wellTech.pivotbank.entity.User;
@@ -8,6 +9,7 @@ import com.wellTech.pivotbank.utils.AccNumbGenerator;
 import com.wellTech.pivotbank.utils.CustomUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.info.ProjectInfoProperties;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -19,11 +21,14 @@ public class UserServiceImplementation implements UserService{
     private EmailService emailService;
     private TransactionLogService transactionLogService;
     private   TransactionLogDTO logDto;
+    private PasswordEncoder passwordEncoder;
     @Autowired
-    public UserServiceImplementation(UserRepo userRepo,EmailService emailService,TransactionLogService transactionLogService){
+    public UserServiceImplementation(UserRepo userRepo,EmailService emailService,
+                                     TransactionLogService transactionLogService,PasswordEncoder passwordEncoder){
         this.userRepo = userRepo;
         this.emailService=emailService;
         this.transactionLogService= transactionLogService;
+        this.passwordEncoder = passwordEncoder;
     }
     @Override
     public BankResponse createUserAccount(UserDTO userDTO) {
@@ -37,6 +42,7 @@ public class UserServiceImplementation implements UserService{
                         .accountNumber(AccNumbGenerator.generateAccountNumber())
                         .accountBalance(BigDecimal.ZERO)
                         .email(userDTO.email())
+                        .password(userDTO.password())
                         .phoneNumber(userDTO.phoneNumber())
                         .otherPhoneNumber(userDTO.otherPhoneNumber())
                         .status("active")
