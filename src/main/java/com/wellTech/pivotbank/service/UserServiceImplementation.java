@@ -42,7 +42,7 @@ public class UserServiceImplementation implements UserService{
                         .accountNumber(AccNumbGenerator.generateAccountNumber())
                         .accountBalance(BigDecimal.ZERO)
                         .email(userDTO.email())
-                        .password(userDTO.password())
+                        .password(passwordEncoder.encode(userDTO.password()))
                         .phoneNumber(userDTO.phoneNumber())
                         .otherPhoneNumber(userDTO.otherPhoneNumber())
                         .status("active")
