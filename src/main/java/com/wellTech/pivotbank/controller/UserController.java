@@ -40,6 +40,11 @@ public class UserController {
         return userService.createUserAccount(userDTO);
     }
 
+    @PostMapping("/login")
+    public BankResponse login(@RequestBody LoginDTO loginDTO){
+        return userService.login(loginDTO);
+    }
+
     @Operation(
             summary = "Gets Account Details",
             description = "User must exist"

@@ -1,7 +1,9 @@
 package com.wellTech.pivotbank.service;
 
+import com.wellTech.pivotbank.config.JwtTokenProvider;
 import com.wellTech.pivotbank.config.SecurityConfig;
 import com.wellTech.pivotbank.dto.*;
+import com.wellTech.pivotbank.entity.Role;
 import com.wellTech.pivotbank.entity.TransactionLog;
 import com.wellTech.pivotbank.entity.User;
 import com.wellTech.pivotbank.repository.UserRepo;
@@ -9,6 +11,9 @@ import com.wellTech.pivotbank.utils.AccNumbGenerator;
 import com.wellTech.pivotbank.utils.CustomUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.info.ProjectInfoProperties;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -16,19 +21,23 @@ import java.math.BigDecimal;
 
 @Service
 public class UserServiceImplementation implements UserService{
-
     private UserRepo userRepo;
     private EmailService emailService;
     private TransactionLogService transactionLogService;
     private   TransactionLogDTO logDto;
     private PasswordEncoder passwordEncoder;
+    private AuthenticationManager authenticationManager;
+    private JwtTokenProvider jwtTokenProvider;
     @Autowired
     public UserServiceImplementation(UserRepo userRepo,EmailService emailService,
-                                     TransactionLogService transactionLogService,PasswordEncoder passwordEncoder){
+                                     TransactionLogService transactionLogService,PasswordEncoder passwordEncoder,
+                                     AuthenticationManager authenticationManager,JwtTokenProvider jwtTokenProvider){
         this.userRepo = userRepo;
         this.emailService=emailService;
         this.transactionLogService= transactionLogService;
         this.passwordEncoder = passwordEncoder;
+        this.authenticationManager = authenticationManager;
+        this.jwtTokenProvider=jwtTokenProvider;
     }
     @Override
     public BankResponse createUserAccount(UserDTO userDTO) {
@@ -46,6 +55,7 @@ public class UserServiceImplementation implements UserService{
                         .phoneNumber(userDTO.phoneNumber())
                         .otherPhoneNumber(userDTO.otherPhoneNumber())
                         .status("active")
+                        .role(Role.valueOf("USER"))
                         .build();
 
         //TODO: Check if user has an account already
@@ -79,6 +89,28 @@ public class UserServiceImplementation implements UserService{
                                                               .build())
                 .build();
 
+    }
+
+    public BankResponse login(LoginDTO loginDTO){
+        Authentication authentication = null;
+        authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginDTO.email(), loginDTO.password())
+        );
+
+        EmailDetailsDTO alert = EmailDetailsDTO.builder()
+                .subject("Pivot-Bank You're Logged In")
+                .recipient(loginDTO.email())
+                .messageBody("Logged in successfully. If you did not initiate this, please contact us immediately")
+                .build();
+        emailService.sendEmail(alert);
+
+        return BankResponse.builder()
+                .responseCode(CustomUtils.LOGIN_SUCCESS_CODE)
+                /**
+                 * return a jwt token
+                 */
+                .responseMessage(jwtTokenProvider.generateToken(authentication))
+                .build();
     }
 
     @Override

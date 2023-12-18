@@ -24,4 +24,6 @@ public class CustomUtils {
     public static final String TRANSFER_SUCCESS_MESSAGE = "Transferred successfully";
     public static final String DEBIT_SUCCESS_CODE = "007";
     public static final String DEBIT_SUCCESS_MESSAGE = "Debited successfully";
+    public static final String LOGIN_SUCCESS_MESSAGE = "Login success";
+    public static final String LOGIN_SUCCESS_CODE = "008";
 }

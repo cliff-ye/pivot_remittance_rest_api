@@ -50,7 +50,6 @@ public class User implements UserDetails {
     private BigDecimal accountBalance;
     @Email
     private String email;
-
     private String password;
     @NotNull
     @Size(min=10)

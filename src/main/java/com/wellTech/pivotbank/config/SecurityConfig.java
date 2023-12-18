@@ -62,7 +62,8 @@ public class SecurityConfig {
 
         return http.authorizeHttpRequests(requests ->
                                                 requests
-                                                         .requestMatchers(HttpMethod.POST,"/api/users").permitAll().anyRequest().authenticated()
+                                                         .requestMatchers(HttpMethod.POST,"/api/users").permitAll()
+                                                         .requestMatchers(HttpMethod.POST,"/api/users/login").permitAll().anyRequest().authenticated()
         )
                 .httpBasic(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
